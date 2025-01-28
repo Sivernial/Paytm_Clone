@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const zod = require("zod");
 const jwt = require("jsonwebtoken");
+const { authMiddleware } = require("../middleware.js");
 const JWT_SECRET = require("../config.js");
 
 const signUpSchema = zod.object({
@@ -65,6 +66,42 @@ router.post("/signin", async (req, res) => {
 
   res.status(411).json({
     message: "Error while logging in",
+  });
+});
+
+const updateBody = zod.object({
+  password: zod.string().min(6).optional(),
+  firstName: zod.string().min(3).optional(),
+  lastName: zod.string().min(3).optional(),
+});
+
+router.put("/update", authMiddleware, async (req, res) => {
+  const { success } = updateBody.safeParse(req.body);
+  if (!success) {
+    return res.status(411).json({
+      message: "Email while updating information",
+    });
+  }
+
+  await User.updateOne({ _id: req.userID }, req.body);
+  res.json({
+    message: "User updated successfully",
+  });
+});
+
+router.get("/bulk", async (req, res) => {
+  const filter = req.query.filter;
+
+  const users = await User.find({
+    $or: [{ firstName: { $regex: filter } }, { lastName: { $regex: filter } }],
+  });
+  res.json({
+    users: users.map((user) => ({
+      userName: user.userName,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      _id: user._id,
+    })),
   });
 });
 
