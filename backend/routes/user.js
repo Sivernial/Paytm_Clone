@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const zod = require("zod");
+const { User, Account } = require("../db.js");
 const jwt = require("jsonwebtoken");
 const { authMiddleware } = require("../middleware.js");
-const JWT_SECRET = require("../config.js");
+const { JWT_SECRET } = require("../config.js");
 
 const signUpSchema = zod.object({
   userName: zod.string().email(),
@@ -14,21 +15,25 @@ const signUpSchema = zod.object({
 
 router.post("/signup", async (req, res) => {
   const body = req.body;
-  const { result } = signUpSchema.safeParse(body);
-  if (!result) {
+
+  const { success } = signUpSchema.safeParse(body);
+  if (!success) {
     return res.status(400).json({
       message: "Invalid request body",
-      error: signUpSchema.errors,
     });
   }
 
-  const user = User.findOne({ userName: body.userName });
-  if (user._id) {
-    return res.status(411).json({
+  const user = await User.findOne({ userName: body.userName });
+  if (user) {
+    res.status(411).json({
       message: "Email already taken / Incorrect inputs",
     });
+    return;
   }
   const dbUser = await User.create(body);
+  const userId = dbUser._id;
+  await Account.create({ userId: userId, balance: 1 + Math.random() * 1000 });
+
   const token = jwt.sign({ userID: dbUser._id }, JWT_SECRET);
 
   res.status(201).json({
@@ -70,22 +75,24 @@ router.post("/signin", async (req, res) => {
 });
 
 const updateBody = zod.object({
-  password: zod.string().min(6).optional(),
-  firstName: zod.string().min(3).optional(),
-  lastName: zod.string().min(3).optional(),
+  password: zod.string().optional(),
+  firstName: zod.string().optional(),
+  lastName: zod.string().optional(),
 });
 
 router.put("/update", authMiddleware, async (req, res) => {
   const { success } = updateBody.safeParse(req.body);
   if (!success) {
-    return res.status(411).json({
-      message: "Email while updating information",
+    res.status(411).json({
+      message: "Error while updating information",
     });
+    return;
   }
 
   await User.updateOne({ _id: req.userID }, req.body);
+
   res.json({
-    message: "User updated successfully",
+    message: "Updated successfully",
   });
 });
 
@@ -105,4 +112,4 @@ router.get("/bulk", async (req, res) => {
   });
 });
 
-model.exports = router;
+module.exports = router;
