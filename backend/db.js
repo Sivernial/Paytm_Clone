@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 mongoose
   .connect(
-    "mongodb+srv://Sivernial:etJyT9x43JPgEct6@livecohort.0qptjz1.mongodb.net/"
+    "mongodb+srv://Sivernial:14Samyak_06@database1.hbedk.mongodb.net/"
+    // mongodb+srv://Sivernial:14Samyak_06@database1.hbedk.mongodb.net/
   )
   .then(() => {
     console.log("Connected to MongoDB");
@@ -23,7 +24,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minLength: 5,
+    minLength: 6,
     trim: true,
   },
   firstName: {
@@ -41,7 +42,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 const accountSchema = new mongoose.Schema({
-  userId: {
+  userID: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
@@ -56,8 +57,7 @@ const accountSchema = new mongoose.Schema({
     required: true,
   },
 });
-
-const Account = mongoose.model("Account", accountSchema);
 const User = mongoose.model("User", userSchema);
+const Account = mongoose.model("Account", accountSchema);
 
 module.exports = { User, Account };

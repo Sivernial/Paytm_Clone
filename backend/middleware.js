@@ -1,10 +1,10 @@
-const { JWT_SECRET } = require("../config");
+const { JWT_SECRET } = require("./config");
 const jwt = require("jsonwebtoken");
 
-const authVerify = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res.status(403).json({
       message: "Unauthorized",
     });
@@ -14,14 +14,13 @@ const authVerify = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.userID) {
-      req.userID = decoded.userID;
-      next();
-    }
+    req.userID = decoded.userID;
+    next(); // Proceed to the next middleware or route
   } catch (err) {
     return res.status(403).json({
       message: "Unauthorized",
     });
   }
-  module.exports = authVerify;
 };
+
+module.exports = { authMiddleware };

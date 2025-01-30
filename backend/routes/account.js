@@ -2,10 +2,12 @@ const express = require("express");
 const { authMiddleware } = require("../middleware.js");
 const { Account } = require("../db.js");
 const router = express.Router();
-const mongoose = require("mongoose");
+const { default: mongoose } = require("mongoose");
 
 router.get("/balance", authMiddleware, async (req, res) => {
-  const account = await Account.findOne({ userID: req.userID });
+  const account = await Account.findOne({
+     userID: req.userID
+  });
 
   if (!account) {
     return res.status(404).json({
@@ -58,3 +60,5 @@ router.post("/deposit", authMiddleware, async (req, res) => {
     message: "Transfer successfully",
   });
 });
+
+module.exports = router;
