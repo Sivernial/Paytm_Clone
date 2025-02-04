@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 import { MONGODB_URI } from "./config";
 mongoose
-  .connect("MONGODB_URI")
+  .connect(MONGODB_URI)
   .then(() => {
     console.log("Connected to MongoDB");
   })
