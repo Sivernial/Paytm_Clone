@@ -1,10 +1,7 @@
 const mongoose = require("mongoose");
-
+import { MONGODB_URI } from "./config";
 mongoose
-  .connect(
-    "mongodb+srv://Sivernial:14Samyak_06@database1.hbedk.mongodb.net/"
-    // mongodb+srv://Sivernial:14Samyak_06@database1.hbedk.mongodb.net/
-  )
+  .connect("MONGODB_URI")
   .then(() => {
     console.log("Connected to MongoDB");
   })
